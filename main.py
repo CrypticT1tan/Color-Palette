@@ -130,13 +130,14 @@ class ColorPalette:
             base_path = sys._MEIPASS
         # # In cases where the .py file is run instead of the app (_MEIPASS doesn't exist)
         except AttributeError:
+            # Sets the base_path to the current working directory
             base_path = os.path.abspath(".")
         # The absolute path of the resource passed in is returned
         return os.path.join(base_path, relative_path)
 
-# Prevent the window from closing immediately upon reaching the end of this file
-# Loops back to the top
 if __name__ == "__main__":
     color_palette = ColorPalette()
+    # Prevent the window from closing immediately upon reaching the end of this file
+    # Loops back to the top
     color_palette.window.mainloop()
 
