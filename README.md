@@ -27,4 +27,4 @@ You can hold up to 8 hex codes/colors at once.
 For any questions, contact me at gavinkiosco@gmail.com or CrypticT1tan on GitHub.
 
 ## Attribution
-Icon made by Freepik from www.flaticon.com
+Application icon made by Freepik from www.flaticon.com
