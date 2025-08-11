@@ -1,4 +1,6 @@
+# Local Application Imports
 from color_palette import ColorPalette
+
 
 if __name__ == "__main__":
     color_palette = ColorPalette()

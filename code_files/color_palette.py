@@ -1,55 +1,66 @@
-# Imported Files
-from util import resource_path
-
-# Imported Modules
+# Third Party Imports
 import tkinter as tk
 from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
+
 import PIL
 from PIL import Image, ImageTk
 
+# Local Application Imports
+from util import resource_path
+
+
 class ColorPalette:
     def __init__(self):
-        # Main Program Window Setup
-        self.window = tk.Tk()
-        self.window.title("Color Palette Generator")
-
         # Constants For Program
         self.font = "Futura"
         self.title_size = 40
         self.code_size = 20
         self.palette_length = 8
         self.image_size = 450
+        self.window_color = "#e6be94"
+        self.title_color = "#654321"
+
+        # Main Program Window Setup
+        self.window = tk.Tk()
+        self.window.title("Color Palette")
+        self.window.config(bg=self.window_color)
 
         # For displaying the image (initially a placeholder image)
-        self.current_image_pil = Image.open(resource_path("assets/start.png"))
+        self.current_image_pil = Image.open(resource_path("assets/canvas.png")).resize((self.image_size, self.image_size))
         self.current_image_rgba = self.current_image_pil.convert("RGBA")
         self.current_image = ImageTk.PhotoImage(self.current_image_pil)
 
         # Title Stuff
-        self.title_label = tk.Label(text="Color Palette Generator", font=(self.font, self.title_size, "bold"), justify="center")
+        self.title_label = tk.Label(text="Color Palette", font=(self.font, self.title_size, "bold"), justify="center",
+                                    bg=self.window_color, fg=self.title_color)
         self.title_label.grid(row=0, column=0, columnspan=self.palette_length)
 
         # Image Path Text Entry and Button
-        self.image_path_entry = tk.Entry(self.window, width=50, state="readonly")
+        self.image_path_entry = tk.Entry(self.window, width=50, state="readonly", highlightbackground=self.window_color)
         self.image_path_entry.grid(row=1, column=0, columnspan=self.palette_length)
-        self.image_display_button = tk.Button(text="Browse Image Files", command=self.find_image)
+        self.image_display_button = tk.Button(text="Browse Image Files", command=self.find_image,
+                                              highlightbackground=self.window_color)
         self.image_display_button.grid(row=2, column=0, columnspan=self.palette_length)
 
         # Setup Canvas
-        self.canvas = tk.Canvas(self.window, height=self.image_size, width=self.image_size)
+        self.canvas = tk.Canvas(self.window, height=self.image_size, width=self.image_size, borderwidth=0,
+                                highlightbackground=self.window_color, bg=self.window_color)
         self.canvas.grid(row=3, column=0, columnspan=self.palette_length)
-        self.canvas_image = self.canvas.create_image(self.image_size / 2, self.image_size / 2, image=self.current_image)
+        self.canvas_image = self.canvas.create_image(self.image_size / 2, self.image_size / 2,
+                                                     image=self.current_image)
 
         # Create Initial Color Palette (Consists of Frames)
         self.hex_label_list = []  # List of hex code labels for each color
         self.color_frame_list = [] # List of frames that hold colors
         for i in range(self.palette_length):
-            hex_label = tk.Label(self.window, font=(self.font, self.code_size))
+            hex_label = tk.Entry(self.window, font=(self.font, self.code_size), width=9, borderwidth=3,
+                                 highlightbackground=self.window_color)
             hex_label.grid(row=4, column=i)
+            hex_label.config(state="readonly", readonlybackground=self.window_color)
             self.hex_label_list.append(hex_label)
-            color_frame = tk.Frame(self.window, bg="white", borderwidth=3, width=128, height=128, relief="solid", padx=0,
-                                pady=0)
+            color_frame = tk.Frame(self.window, bg=self.window_color, width=128, height=128,
+                                   relief="solid", highlightbackground=self.window_color)
             color_frame.grid(row=5, column=i)
             self.color_frame_list.append(color_frame)
 
@@ -70,13 +81,19 @@ class ColorPalette:
                 current_label = self.hex_label_list[i]
                 next_label = self.hex_label_list[i - 1]
                 # Change the current label to the one on the left
-                current_label.config(text=next_label.cget("text"))
+                current_label.config(state="normal")
+                current_label.delete(0, tk.END)
+                current_label.insert(0, next_label.get())
+                current_label.config(state="readonly")
                 current_frame = self.color_frame_list[i]
                 next_frame = self.color_frame_list[i - 1]
                 # Change the current color to the one on the left
                 current_frame.config(bg=next_frame.cget("bg"))
             # Put most recent pixel color onto the leftmost square
-            self.hex_label_list[0].config(text=pixel_color)
+            self.hex_label_list[0].config(state="normal")
+            self.hex_label_list[0].delete(0, tk.END)
+            self.hex_label_list[0].insert(0, pixel_color)
+            self.hex_label_list[0].config(state="readonly")
             self.color_frame_list[0].config(bg=pixel_color)
         except IndexError:
             pass
@@ -112,9 +129,9 @@ class ColorPalette:
                 self.canvas.bind("<Button-1>", func=lambda event: self.get_pixel_color(event, self.current_image_rgba))
                 # Reset the palette when a new image is displayed
                 for i in range(self.palette_length):
-                    self.color_frame_list[i].config(bg="white") # Reset color frames
+                    self.color_frame_list[i].config(bg=self.window_color) # Reset color frames
                     self.hex_label_list[i].config(text="") # Reset hex code labels
-        except (IsADirectoryError, PIL.UnidentifiedImageError, TimeoutError) as e: # In the case a directory/non-image file is selected
+        except (IsADirectoryError, PIL.UnidentifiedImageError, TimeoutError): # In the case a directory/non-image file is selected
             # Display error message for an invalid image file
             messagebox.showerror("ERROR!", "Invalid image file.\nPlease try again.")
         else:
